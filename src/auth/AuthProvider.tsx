@@ -3,7 +3,6 @@ import {
     createContext,
     useContext,
     useEffect,
-    useLayoutEffect,
     useState,
     type ReactNode,
 } from 'react';
@@ -37,34 +36,39 @@ export function AuthProvider({
     }
 
     /** Attach token to requests */
-    useLayoutEffect(() => {
+    useEffect(() => {
         const interceptor = api.interceptors.request.use((config) => {
             if (token) config.headers.Authorization = `Bearer ${token}`;
             return config;
         });
         return () => api.interceptors.request.eject(interceptor);
-    }, [api, token]);
+    }, [token]);
 
     /** Retry failed requests on 401 */
-    useLayoutEffect(() => {
+    useEffect(() => {
         const interceptor = api.interceptors.response.use(
             (res) => res,
             async (err) => {
                 const originalRequest = err.config;
                 if (err.response?.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true;
+
+                    // refresh the token
                     const newToken = await refreshTokenFn();
                     setToken(newToken);
+
                     if (newToken) {
                         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                        // Re-run the original request with the new token
                         return api(originalRequest);
                     }
                 }
                 return Promise.reject(err);
             },
         );
+
         return () => api.interceptors.response.eject(interceptor);
-    }, [api, refreshTokenFn]);
+    }, []);
 
     return (
         <AuthContext.Provider value={{ token, setToken, refreshToken }}>
