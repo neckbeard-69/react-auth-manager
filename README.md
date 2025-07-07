@@ -20,7 +20,7 @@ A straightforward and adaptable React authentication context library designed fo
 To get started, install the library using npm:
 
 ```bash
-npm install react-auth-manager
+npm install @neckbeard/react-auth-manager
 ````
 
 > **Note:** Axios is a peer dependency and must be installed separately in your project:

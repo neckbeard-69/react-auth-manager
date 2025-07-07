@@ -1,5 +1,5 @@
 {
-    "name": "react-auth-manager",
+    "name": "@neckbeard-69/react-auth-manager",
     "version": "0.1.0",
     "main": "dist/index.cjs",
     "module": "dist/index.mjs",
