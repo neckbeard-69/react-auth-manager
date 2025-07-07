@@ -1,5 +1,4 @@
-import React from 'react';
-import {
+import React, {
     createContext,
     useContext,
     useEffect,
@@ -22,8 +21,12 @@ export function AuthProvider({
     children,
     api,
     refreshTokenFn,
-}: AuthProviderProps) {
+    fetchUserFn, // <-- new prop: function to fetch user profile
+}: AuthProviderProps & { fetchUserFn: () => Promise<any> }) {
     const [token, setToken] = useState<Token>(null);
+    const [user, setUser] = useState<any>(null);
+    const [loadingUser, setLoadingUser] = useState(false);
+    const [errorUser, setErrorUser] = useState<string | null>(null);
 
     /** Initialize session on mount */
     useEffect(() => {
@@ -34,6 +37,27 @@ export function AuthProvider({
         const newToken = await refreshTokenFn();
         setToken(newToken);
     }
+
+    /** Fetch user whenever token changes */
+    useEffect(() => {
+        if (!token) {
+            setUser(null);
+            setErrorUser(null);
+            return;
+        }
+
+        setLoadingUser(true);
+        fetchUserFn()
+            .then((data) => {
+                setUser(data);
+                setErrorUser(null);
+            })
+            .catch(() => {
+                setUser(null);
+                setErrorUser('Failed to fetch user');
+            })
+            .finally(() => setLoadingUser(false));
+    }, [token, fetchUserFn]);
 
     /** Attach token to requests */
     useEffect(() => {
@@ -71,7 +95,16 @@ export function AuthProvider({
     }, []);
 
     return (
-        <AuthContext.Provider value={{ token, setToken, refreshToken }}>
+        <AuthContext.Provider
+            value={{
+                token,
+                setToken,
+                refreshToken,
+                user,
+                loadingUser,
+                errorUser,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

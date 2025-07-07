@@ -1,16 +1,9 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { useIsAuthenticated, useUser } from '../hooks';
 import { SignedIn, SignedOut } from '../components';
 import { TestAuthProvider } from '../__helpers__/test-utils';
-
-// Mock API function for useUser hook
-const mockFetchUser = jest.fn();
-
-beforeEach(() => {
-    jest.clearAllMocks();
-});
 
 describe('useIsAuthenticated', () => {
     it('returns false when no token', () => {
@@ -69,64 +62,85 @@ describe('SignedIn and SignedOut components', () => {
 });
 
 describe('useUser hook', () => {
-    it('fetches user data successfully when token exists', async () => {
+    it('returns user data when provided in context', () => {
         const userData = {
             email: 'test@example.com',
             first_name: 'Test',
             last_name: 'User',
             role: 'admin',
         };
-        mockFetchUser.mockResolvedValueOnce(userData);
 
         const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <TestAuthProvider initialToken="token123">
+            <TestAuthProvider
+                initialToken="token123"
+                initialUser={userData}
+                loadingUser={false}
+            >
                 {children}
             </TestAuthProvider>
         );
 
-        const { result } = renderHook(() => useUser(mockFetchUser), {
+        const { result } = renderHook(() => useUser(), {
             wrapper,
         });
 
-        expect(result.current.loading).toBe(true);
-        await waitFor(() => expect(result.current.loading).toBe(false));
-
+        expect(result.current.loading).toBe(false);
         expect(result.current.user).toEqual(userData);
         expect(result.current.error).toBeNull();
     });
 
-    it('handles fetch error and sets error state', async () => {
-        mockFetchUser.mockRejectedValueOnce(new Error('Failed to fetch'));
-
+    it('returns loading true when context says loading', () => {
         const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <TestAuthProvider initialToken="token123">
+            <TestAuthProvider
+                initialToken="token123"
+                initialUser={null}
+                loadingUser={true}
+            >
                 {children}
             </TestAuthProvider>
         );
 
-        const { result } = renderHook(() => useUser(mockFetchUser), {
+        const { result } = renderHook(() => useUser(), {
             wrapper,
         });
 
         expect(result.current.loading).toBe(true);
-        await waitFor(() => expect(result.current.loading).toBe(false));
+        expect(result.current.user).toBeNull();
+        expect(result.current.error).toBeNull();
+    });
 
+    it('returns error state when context provides error', () => {
+        const wrapper = ({ children }: { children: React.ReactNode }) => (
+            <TestAuthProvider
+                initialToken="token123"
+                initialUser={null}
+                loadingUser={false}
+                errorUser="Failed to fetch user"
+            >
+                {children}
+            </TestAuthProvider>
+        );
+
+        const { result } = renderHook(() => useUser(), {
+            wrapper,
+        });
+
+        expect(result.current.loading).toBe(false);
         expect(result.current.user).toBeNull();
         expect(result.current.error).toBe('Failed to fetch user');
     });
 
-    it('does not fetch user if token is null', () => {
+    it('does not provide user when token is null', () => {
         const wrapper = ({ children }: { children: React.ReactNode }) => (
             <TestAuthProvider initialToken={null}>{children}</TestAuthProvider>
         );
 
-        const { result } = renderHook(() => useUser(mockFetchUser), {
+        const { result } = renderHook(() => useUser(), {
             wrapper,
         });
 
         expect(result.current.user).toBeNull();
         expect(result.current.error).toBeNull();
         expect(result.current.loading).toBe(false);
-        expect(mockFetchUser).not.toHaveBeenCalled();
     });
 });

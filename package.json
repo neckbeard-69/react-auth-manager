@@ -1,6 +1,6 @@
 {
     "name": "@neckbeard-69/react-auth-manager",
-    "version": "0.1.3",
+    "version": "0.2.0",
     "license": "MIT",
     "main": "dist/index.cjs",
     "module": "dist/index.mjs",

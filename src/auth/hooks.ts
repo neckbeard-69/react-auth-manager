@@ -1,5 +1,4 @@
 import { useAuth } from './AuthProvider';
-import { useState, useEffect } from 'react';
 
 export function useIsAuthenticated() {
     const { token } = useAuth();
@@ -25,27 +24,8 @@ export function useSignOut() {
     };
 }
 
-export function useUser(fetchUser: () => Promise<any>) {
-    const { token } = useAuth();
-    const [user, setUser] = useState<any>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!token) {
-            setUser(null);
-            return;
-        }
-
-        setLoading(true);
-        fetchUser()
-            .then((data) => setUser(data))
-            .catch(() => {
-                setError('Failed to fetch user');
-                setUser(null);
-            })
-            .finally(() => setLoading(false));
-    }, [token, fetchUser]);
-
-    return { user, loading, error };
+export function useUser() {
+    const { user, loadingUser, errorUser } = useAuth();
+    return { user, loading: loadingUser, error: errorUser };
 }

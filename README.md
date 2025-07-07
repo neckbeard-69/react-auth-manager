@@ -1,44 +1,37 @@
 # react-auth-manager
 
-A straightforward and adaptable React authentication context library designed for managing tokens, silent refreshes, and conditional rendering. It seamlessly integrates with any Axios instance.
-
----
+A straightforward and adaptable React authentication context library for managing tokens, silent refreshes, and user state—all integrated with any Axios instance.
 
 ## Key Features
 
-* **Effortless Integration:** A drop-in `<AuthProvider>` component for your React applications.
-* **Automatic Interception:** Includes automatic request and response interceptors to streamline token handling.
-* **Customizable Refresh:** Provides a pluggable function for handling token refreshes.
-* **Comprehensive Hooks:** Offers a suite of hooks including `useAuth`, `useIsAuthenticated`, `useSignIn`, `useSignOut`, `useRefresh`, and `useUser` for various authentication needs.
-* **Conditional Rendering Utilities:** Features `<SignedIn>`, `<SignedOut>`, and `<AuthSwitch>` components to simplify UI rendering based on authentication status.
-* **Lightweight:** Has zero runtime dependencies, with React and Axios as peer dependencies.
-
----
+  * **Effortless Integration:** A drop-in `<AuthProvider>` for React applications.
+  * **Automatic Interceptors:** Request and response interceptors handle token management.
+  * **Silent Refresh:** Supports custom refresh logic.
+  * **User Profile Handling:** Fetches and caches user profiles automatically.
+  * **Comprehensive Hooks:** Includes `useAuth`, `useIsAuthenticated`, `useSignIn`, `useSignOut`, `useRefresh`, and `useUser`.
+  * **Conditional Rendering:** `<SignedIn>`, `<SignedOut>`, and `<AuthSwitch>` facilitate rendering UI based on authentication state.
+  * **Lightweight:** Zero runtime dependencies beyond React and Axios.
 
 ## Installation
 
-To get started, install the library using npm:
-
 ```bash
 npm install @neckbeard/react-auth-manager
-````
+```
 
-> **Note:** Axios is a peer dependency and must be installed separately in your project:
->
-> ```bash
-> npm install axios
-> ```
+**Note:** Axios is a peer dependency and must be installed separately:
 
------
+```bash
+npm install axios
+```
 
 ## Usage Guide
 
 ### 1\. Wrap Your Application
 
-Begin by wrapping your main application component with the `AuthProvider`. You'll need to provide your Axios instance and a function for refreshing tokens.
+Wrap your application with `<AuthProvider>`, providing your Axios instance and functions for token refresh and user fetching.
 
-```tsx
-import { AuthProvider } from 'neckbeard-69/react-auth-manager';
+```jsx
+import { AuthProvider } from '@neckbeard/react-auth-manager';
 import axios from 'axios';
 
 const api = axios.create({ baseURL: '/api' });
@@ -49,11 +42,19 @@ export default function App() {
       api={api}
       refreshTokenFn={async () => {
         try {
-          const res = await api.post('/refresh_token');
-          return res.data.access_token;
+          const response = await api.post('/refresh_token');
+          // Assuming the refresh token endpoint returns the new access token directly in response.data.accessToken
+          return response.data.accessToken; 
         } catch (error) {
-          console.error("Failed to refresh token:", error);
+          console.error('Token refresh failed:', error);
+          // It's often good practice to re-throw or handle the error to trigger a sign-out if refresh fails critically
+          throw error; 
         }
+      }}
+      fetchUserFn={async () => {
+        // Assuming the user profile endpoint returns user data directly in response.data
+        const response = await api.get('/me');
+        return response.data;
       }}
     >
       <YourRoutes />
@@ -62,26 +63,25 @@ export default function App() {
 }
 ```
 
------
+### 2\. Sign In and Out
 
-### 2\. Sign In and Sign Out
+Utilize `useSignIn` and `useSignOut` for managing login and logout operations.
 
-Utilize the `useSignIn` and `useSignOut` hooks to manage user sessions.
-
-```tsx
-import { useSignIn, useSignOut } from 'neckbeard-69/react-auth-manager';
-import api from './api';
+```jsx
+import { useSignIn, useSignOut } from '@neckbeard/react-auth-manager';
+import api from './api'; // Ensure this points to your configured Axios instance
 
 export function LoginButton() {
   const signIn = useSignIn();
 
   async function handleLogin() {
     try {
-      const res = await api.post('/login', { username: '...', password: '...' });
-      signIn(res.data.access_token);
+      const response = await api.post('/login', { username: '...', password: '...' });
+      // Assuming the login endpoint returns the access token directly in response.data.accessToken
+      signIn(response.data.accessToken); 
     } catch (error) {
-      console.error("Login failed:", error);
-      alert("Login failed. Please check your credentials.");
+      console.error('Login failed:', error);
+      // Handle login error, e.g., display an error message to the user
     }
   }
 
@@ -90,15 +90,15 @@ export function LoginButton() {
 
 export function LogoutButton() {
   const signOut = useSignOut();
-  
+
   async function handleLogout() {
     try {
-      // Optionally call an API endpoint to invalidate the session on the server
-      await api.post('/logout'); 
-      signOut();
+      await api.post('/logout'); // Optional: Call your backend logout endpoint
     } catch (error) {
-      console.error("Logout failed:", error);
-      signOut(); 
+      console.error('Logout failed on backend:', error);
+      // Continue with client-side sign out even if backend logout fails
+    } finally {
+      signOut(); // Always clear client-side authentication state
     }
   }
 
@@ -106,89 +106,73 @@ export function LogoutButton() {
 }
 ```
 
------
+### 3\. Access the User Profile
 
-### 3\. Fetch User Information
+The `useUser` hook provides access to the authenticated user's profile.
 
-The `useUser` hook allows you to fetch and cache user-specific data.
-
-```tsx
-import { useUser } from 'neckbeard-69/react-auth-manager';
-import api from './api';
+```jsx
+import { useUser } from '@neckbeard/react-auth-manager';
 
 export function UserProfile() {
-  // The useUser hook handles its own loading and error states internally,
-  // making it clean to use.
-  const { user, loading, error } = useUser(() =>
-    api.get('/me').then(res => res.data)
-  );
+  const { user, loading, error } = useUser();
 
   if (loading) return <p>Loading user profile...</p>;
-  if (error) return <p>Error loading profile: {error.message || 'Unknown error'}</p>;
-  if (!user) return <p>No user data available.</p>; 
+  if (error) return <p>Error loading user profile: {error.message || 'An unknown error occurred'}</p>;
+  if (!user) return <p>No user data available.</p>;
 
-  return <pre>{JSON.stringify(user, null, 2)}</pre>;
+  return (
+    <pre>{JSON.stringify(user, null, 2)}</pre>
+  );
 }
 ```
 
------
-
 ### 4\. Conditional Rendering
 
-Leverage the `<SignedIn>`, `<SignedOut>`, and `<AuthSwitch>` components for conditional rendering based on the user's authentication status.
+Render UI components based on the user's authentication status using `<SignedIn>`, `<SignedOut>`, and `<AuthSwitch>`.
 
-```tsx
-import { SignedIn, SignedOut, AuthSwitch } from 'neckbeard-69/react-auth-manager';
+```jsx
+import { SignedIn, SignedOut, AuthSwitch } from '@neckbeard/react-auth-manager';
 
 export function AuthStatus() {
   return (
     <>
       <SignedIn>
-        <p>Welcome back! You are currently signed in.</p>
+        <p>Welcome back, you are signed in.</p>
       </SignedIn>
 
       <SignedOut>
-        <p>Please log in to continue using all features.</p>
+        <p>Please sign in to continue.</p>
       </SignedOut>
 
       <AuthSwitch
-        signedIn={<p>You are authenticated.</p>}
-        signedOut={<p>You are not authenticated.</p>}
+        signedIn={<p>Authenticated</p>}
+        signedOut={<p>Not authenticated</p>}
       />
     </>
   );
 }
 ```
 
------
-
 ## API Reference
 
-This section provides a detailed overview of the components and hooks available in `react-auth-manager`.
-
-| Feature            | Description                                                                                                                                      |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<AuthProvider>`   | The core context provider. Requires `api` and `refreshTokenFn` props.                                                                            |
-| `useAuth`          | A low-level hook for accessing the authentication state: `{ token, setToken, refreshToken }`.                                                    |
-| `useIsAuthenticated` | Returns `true` if an authentication token is present, indicating a logged-in user.                                                               |
-| `useSignIn`        | Returns a function that accepts an authentication token to establish the user's session.                                                                         |
-| `useSignOut`       | A function that clears the current authentication token, effectively logging out the user.                                                       |
-| `useRefresh`       | A hook that invokes your provided `refreshTokenFn` to refresh the token.                                                                         |
-| `useUser`          | Fetches and intelligently caches user data, automatically updating when the authentication token changes.                                        |
-| `<SignedIn>`       | Renders its children components only when the user is authenticated.                                                                             |
-| `<SignedOut>`      | Renders its children components only when the user is not authenticated.                                                                         |
-| `<AuthSwitch>`     | A versatile component that renders either its `signedIn` or `signedOut` prop based on the authentication status.                                 |
-
------
+| Feature           | Description                                                               |
+| :---------------- | :------------------------------------------------------------------------ |
+| `<AuthProvider>`  | The main authentication provider. Requires `api`, `refreshTokenFn`, and `fetchUserFn` props. |
+| `useAuth`         | Low-level access to authentication state and functions: `{ token, setToken, refreshToken, user, loadingUser, errorUser }`. |
+| `useIsAuthenticated` | Returns `true` if an authentication token exists.                         |
+| `useSignIn`       | A function to call with an access token to sign the user in.              |
+| `useSignOut`      | A function that clears the authentication token and user state.           |
+| `useRefresh`      | A function that triggers the `refreshTokenFn` provided to `AuthProvider`. |
+| `useUser`         | Returns an object containing `{ user, loading, error }` related to the fetched user profile. |
+| `<SignedIn>`      | Renders its children only if the user is signed in.                       |
+| `<SignedOut>`     | Renders its children only if the user is signed out.                      |
+| `<AuthSwitch>`    | Renders the `signedIn` prop's content if authenticated, otherwise renders the `signedOut` prop's content. |
 
 ## Requirements
 
   * React 18+
   * Axios 1.x
 
------
-
 ## License
 
 MIT
-

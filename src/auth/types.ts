@@ -6,6 +6,10 @@ export type AuthContextType = {
     token: Token;
     setToken: (token: Token) => void;
     refreshToken: () => Promise<void>;
+
+    user: any | null;
+    loadingUser: boolean;
+    errorUser: string | null;
 };
 
 export interface AuthProviderProps {
@@ -16,4 +20,7 @@ export interface AuthProviderProps {
 
     /** Called when you need to refresh token, returns new token */
     refreshTokenFn: () => Promise<string | null>;
+
+    /** Called to fetch user profile, returns user data */
+    fetchUserFn: () => Promise<any>;
 }
