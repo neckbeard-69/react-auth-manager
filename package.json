@@ -1,6 +1,6 @@
 {
-    "name": "react-auth-handler",
-    "version": "0.1.2",
+    "name": "react-auth-manager",
+    "version": "0.1.0",
     "main": "dist/index.cjs",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
