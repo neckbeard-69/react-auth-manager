@@ -1,9 +1,10 @@
 {
     "name": "react-auth-handler",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "main": "dist/index.cjs",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
+    "sideEffects": false,
     "exports": {
         ".": {
             "import": "./dist/index.mjs",
@@ -18,7 +19,8 @@
         "build": "tsup src/index.ts --format cjs,esm --dts",
         "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
         "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-        "test": "jest"
+        "test": "jest",
+        "prepare": "husky install"
     },
     "peerDependencies": {
         "axios": "^1.0.0",
