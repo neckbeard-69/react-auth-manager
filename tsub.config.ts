@@ -7,4 +7,9 @@ export default defineConfig({
     external: ['react', 'react-dom'],
     sourcemap: true,
     clean: true,
+    outExtension({ format }) {
+        return {
+            js: format === 'cjs' ? '.cjs' : '.mjs'
+        };
+    },
 });

@@ -38,7 +38,7 @@ npm install @neckbeard/react-auth-manager
 Begin by wrapping your main application component with the `AuthProvider`. You'll need to provide your Axios instance and a function for refreshing tokens.
 
 ```tsx
-import { AuthProvider } from 'react-auth-manager';
+import { AuthProvider } from 'neckbeard-69/react-auth-manager';
 import axios from 'axios';
 
 const api = axios.create({ baseURL: '/api' });
@@ -69,7 +69,7 @@ export default function App() {
 Utilize the `useSignIn` and `useSignOut` hooks to manage user sessions.
 
 ```tsx
-import { useSignIn, useSignOut } from 'react-auth-manager';
+import { useSignIn, useSignOut } from 'neckbeard-69/react-auth-manager';
 import api from './api';
 
 export function LoginButton() {
@@ -113,7 +113,7 @@ export function LogoutButton() {
 The `useUser` hook allows you to fetch and cache user-specific data.
 
 ```tsx
-import { useUser } from 'react-auth-manager';
+import { useUser } from 'neckbeard-69/react-auth-manager';
 import api from './api';
 
 export function UserProfile() {
@@ -138,7 +138,7 @@ export function UserProfile() {
 Leverage the `<SignedIn>`, `<SignedOut>`, and `<AuthSwitch>` components for conditional rendering based on the user's authentication status.
 
 ```tsx
-import { SignedIn, SignedOut, AuthSwitch } from 'react-auth-manager';
+import { SignedIn, SignedOut, AuthSwitch } from 'neckbeard-69/react-auth-manager';
 
 export function AuthStatus() {
   return (
@@ -164,7 +164,7 @@ export function AuthStatus() {
 
 ## API Reference
 
-This section provides a detailed overview of the components and hooks available in `react-auth-handler`.
+This section provides a detailed overview of the components and hooks available in `react-auth-manager`.
 
 | Feature            | Description                                                                                                                                      |
 | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
