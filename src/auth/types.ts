@@ -6,7 +6,7 @@ export type AuthContextType = {
     token: Token;
     setToken: (token: Token) => void;
     refreshToken: () => Promise<void>;
-}
+};
 
 export interface AuthProviderProps {
     children: React.ReactNode;

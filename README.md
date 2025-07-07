@@ -1,4 +1,4 @@
-# react-auth-handler
+# react-auth-manager
 
 A straightforward and adaptable React authentication context library designed for managing tokens, silent refreshes, and conditional rendering. It seamlessly integrates with any Axios instance.
 
@@ -20,7 +20,7 @@ A straightforward and adaptable React authentication context library designed fo
 To get started, install the library using npm:
 
 ```bash
-npm install react-auth-handler
+npm install react-auth-manager
 ````
 
 > **Note:** Axios is a peer dependency and must be installed separately in your project:
@@ -38,7 +38,7 @@ npm install react-auth-handler
 Begin by wrapping your main application component with the `AuthProvider`. You'll need to provide your Axios instance and a function for refreshing tokens.
 
 ```tsx
-import { AuthProvider } from 'react-auth-handler';
+import { AuthProvider } from 'react-auth-manager';
 import axios from 'axios';
 
 const api = axios.create({ baseURL: '/api' });
@@ -69,7 +69,7 @@ export default function App() {
 Utilize the `useSignIn` and `useSignOut` hooks to manage user sessions.
 
 ```tsx
-import { useSignIn, useSignOut } from 'react-auth-handler';
+import { useSignIn, useSignOut } from 'react-auth-manager';
 import api from './api';
 
 export function LoginButton() {
@@ -113,7 +113,7 @@ export function LogoutButton() {
 The `useUser` hook allows you to fetch and cache user-specific data.
 
 ```tsx
-import { useUser } from 'react-auth-handler';
+import { useUser } from 'react-auth-manager';
 import api from './api';
 
 export function UserProfile() {
@@ -138,7 +138,7 @@ export function UserProfile() {
 Leverage the `<SignedIn>`, `<SignedOut>`, and `<AuthSwitch>` components for conditional rendering based on the user's authentication status.
 
 ```tsx
-import { SignedIn, SignedOut, AuthSwitch } from 'react-auth-handler';
+import { SignedIn, SignedOut, AuthSwitch } from 'react-auth-manager';
 
 export function AuthStatus() {
   return (
