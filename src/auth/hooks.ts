@@ -24,7 +24,6 @@ export function useSignOut() {
     };
 }
 
-
 export function useUser() {
     const { user, loadingUser, errorUser } = useAuth();
     return { user, loading: loadingUser, error: errorUser };

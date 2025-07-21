@@ -12,6 +12,10 @@ A straightforward and adaptable React authentication context library for managin
   * **Conditional Rendering:** `<SignedIn>`, `<SignedOut>`, and `<AuthSwitch>` facilitate rendering UI based on authentication state.
   * **Lightweight:** Zero runtime dependencies beyond React and Axios.
 
+## Detailed Documenation
+[Click here](https://neckbeard-69.github.io/react-auth-manager-docs/) to know more.
+
+
 ## Installation
 
 ```bash
